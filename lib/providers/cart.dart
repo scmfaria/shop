@@ -5,6 +5,7 @@ import './product.dart';
 
 class CartItem {
   final String id;
+  final String productId;
   final String title;
   final int quantity;
   final double price;
@@ -14,14 +15,28 @@ class CartItem {
     @required this.title,
     @required this.quantity,
     @required this.price,
+    @required this.productId,
   });
 }
 
 class Cart with ChangeNotifier {
-  Map<String, CartItem> _items;
+  Map<String, CartItem> _items = {};
 
   Map<String, CartItem> get item {
     return { ..._items };
+  }
+
+  int get itemCount {
+    return _items.length;
+  }
+
+  double get totalAmount {
+    double total = 0;
+    _items.forEach((key, value) {
+      total += value.price * value.quantity;
+    });
+
+    return total;
   }
 
   void addItem(Product product) {
@@ -31,7 +46,8 @@ class Cart with ChangeNotifier {
           id: existingItem.id, 
           title: existingItem.title, 
           quantity: existingItem.quantity + 1, 
-          price: existingItem.price
+          price: existingItem.price,
+          productId: product.id
         ),
       );
     } else {
@@ -40,10 +56,16 @@ class Cart with ChangeNotifier {
         title: product.title, 
         quantity: 1, 
         price: product.price,
+        productId: product.id
       ),
      );
     }
 
     notifyListeners();
   } 
+
+  void removeItem(String productId) {
+    _items.remove(productId);
+    notifyListeners();
+  }
 }
