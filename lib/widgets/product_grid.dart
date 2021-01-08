@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../widgets/product_item.dart';
+import 'product_grid_item.dart';
 import '../providers/products.dart';
 
 class ProductGrid extends StatelessWidget {
@@ -21,7 +21,7 @@ class ProductGrid extends StatelessWidget {
       // aqui estou pegando o provider ja criado no metodo main (por isso o uso do .value)
       itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
         value: products[i],
-        child: ProductItem(),
+        child: ProductGridItem(),
       ),
       // esse SliverGridDelegateWithFixedCrossAxisCount é para definir que vamos ter uma qtd fixa de elementos na linha do grid.
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
