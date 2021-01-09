@@ -34,4 +34,8 @@ class Products with ChangeNotifier {
     // para notificar "os interessados" sobre que a lista mudou
     notifyListeners();
   }
+
+  int get productsCount {
+    return _items.length;
+  }
 }
