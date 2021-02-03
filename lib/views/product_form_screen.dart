@@ -1,6 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop/providers/products.dart';
 
 import '../providers/product.dart';
 
@@ -18,9 +18,40 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _formData = Map<String, Object>();
 
   void _updateImage() {
-    setState(() {
-      
-    });
+    if(isValidImageUrl(_imageUrlController.text)) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if(_formData.isEmpty) {
+      final product = ModalRoute.of(context).settings.arguments as Product;
+
+      if(product != null) {
+        _formData['id'] = product.id;
+        _formData['title'] = product.title;
+        _formData['description'] = product.description;
+        _formData['price'] = product.price;
+        _formData['imageUrl'] = product.imageUrl;
+
+        _imageUrlController.text = _formData['imageUrl'];
+      } else {
+        _formData['price'] = '';
+      }
+    }
+  }
+
+  bool isValidImageUrl(String url) {
+    bool isValidProtocol = url.toLowerCase().startsWith('http://') 
+        || url.toLowerCase().startsWith('https://');
+    bool endsWithPng = url.toLowerCase().endsWith('.png');
+    bool endsWithJpg = url.toLowerCase().endsWith('.jpg');
+    bool endsWithJpeg = url.toLowerCase().endsWith('.jpeg');
+
+    return isValidProtocol && (endsWithJpeg || endsWithJpg || endsWithPng);
   }
 
   @override
@@ -48,12 +79,22 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _form.currentState.save();
 
     final newProduct = Product(
-      id: Random().nextDouble().toString(), 
+      id: _formData['id'],
       title: _formData['title'], 
       description: _formData['description'], 
       price: _formData['price'], 
       imageUrl: _formData['imageUrl']
     );
+
+    final provider = Provider.of<Products>(context, listen: false);
+
+    if(_formData['id'] == null) {
+      provider.addProduct(newProduct);
+    } else {
+      provider.updateProduct(newProduct);
+    }
+
+    Navigator.of(context).pop();
   }
 
   @override
@@ -77,6 +118,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           child: ListView(
             children: [
               TextFormField(
+                initialValue: _formData['title'],
                 decoration: InputDecoration(labelText: 'Título'),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) {
@@ -96,6 +138,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 },
               ),
               TextFormField(
+                initialValue: _formData['price'].toString(),
                 decoration: InputDecoration(labelText: 'Preço'),
                 textInputAction: TextInputAction.next,
                 focusNode: _priceFocusNode,
@@ -106,13 +149,35 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   FocusScope.of(context).requestFocus(_descriptionFocusNode);
                 },
                 onSaved: (value) => _formData['price'] = double.parse(value),
+                validator: (value) {
+                  bool empty = value.trim().isEmpty;
+                  bool invalid = double.tryParse(value) == null || double.tryParse(value) <= 0;
+
+                  if(empty || invalid) {
+                    return 'Informe um preço válido';
+                  }
+
+                  return null;
+                },
               ),
               TextFormField(
+                initialValue: _formData['description'],
                 decoration: InputDecoration(labelText: 'Descrição'),
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
                 focusNode: _descriptionFocusNode,
                 onSaved: (value) => _formData['description'] = value,
+                validator: (value) {
+                  if(value.trim().isEmpty) {
+                    return 'Informe uma descrição válida';
+                  }
+
+                  if(value.trim().length < 7) {
+                    return 'Informe um título com no mínimo 7 letras';
+                  }
+                    
+                  return null;  
+                },
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -128,6 +193,13 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         _saveForm();
                       },
                       onSaved: (value) => _formData['imageUrl'] = value,
+                      validator: (value) {
+                        bool empty = value.trim().isEmpty;                      
+                        if(empty || (!isValidImageUrl(value))) 
+                          return 'Informe uma URL válida';
+                        
+                        return null;
+                      },
                     ),
                   ),
                   Container(
