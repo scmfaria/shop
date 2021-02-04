@@ -1,14 +1,15 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'product.dart';
-import '../data/dummy_data.dart';
 
 class Products with ChangeNotifier {
-
-  List<Product> _items = DUMMY_PRODUCTS;
+  final String _url = 'https://flutter-coder-f6c87-default-rtdb.firebaseio.com/products.json';
+  List<Product> _items = [];
 
  // bool _showFavoriteOnly = false;
 
@@ -30,7 +31,42 @@ class Products with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  void addProduct(Product newProduct) {
+  Future<void> loadProducts() async {
+    final response = await http.get(_url);
+    Map<String, dynamic> data = json.decode(response.body);
+
+    _items.clear();
+    
+    if(data != null) {
+      data.forEach((productId, productData) {
+        _items.add(Product(
+          id: productId,
+          title: productData['title'], 
+          description: productData['description'], 
+          price: productData['price'], 
+          imageUrl: productData['imageUrl'],
+          isFavorite: productData['isFavorite'],
+        ));
+      });
+      notifyListeners();
+    }
+    
+    return Future.value();
+  }
+
+  Future<void> addProduct(Product newProduct) async {
+    final response = await http.post(
+      _url, 
+      body: json.encode({
+        'title': newProduct.title,
+        'description': newProduct.description,
+        'price': newProduct.price,
+        'imageUrl': newProduct.imageUrl,
+        'isFavorite': newProduct.isFavorite,
+      }),
+    );
+
+    json.decode(response.body);
     _items.add(Product(
       id: Random().nextDouble().toString(),
       title: newProduct.title, 
