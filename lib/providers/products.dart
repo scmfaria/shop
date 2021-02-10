@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:shop/exceptions/http_exception.dart';
 import 'product.dart';
 
 class Products with ChangeNotifier {
