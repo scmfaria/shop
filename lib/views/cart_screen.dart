@@ -40,15 +40,7 @@ class CartScreen extends StatelessWidget {
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
                   Spacer(),
-                  FlatButton(
-                    onPressed: () {
-                      Provider.of<Orders>(context, listen: false)
-                      .addOrder(cartItems, cart.totalAmount);
-                      cart.clear();
-                    }, 
-                    child: Text('COMPRAR'),
-                    textColor: Theme.of(context).primaryColor,
-                  ),
+                  OrderButton(cart: cart, cartItems: cartItems),
                 ],
               ),
             ),
@@ -62,6 +54,46 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    Key key,
+    @required this.cart,
+    @required this.cartItems,
+  }) : super(key: key);
+
+  final Cart cart;
+  final List<CartItem> cartItems;
+
+  @override
+  _OrderButtonState createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      child: _isLoading ? CircularProgressIndicator() : Text('COMPRAR'),
+      textColor: Theme.of(context).primaryColor,
+      onPressed: widget.cart.totalAmount == 0 ? null : () async {
+        setState(() {
+          _isLoading = true;
+        });
+
+        await Provider.of<Orders>(context, listen: false)
+        .addOrder(widget.cartItems, widget.cart.totalAmount);
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        widget.cart.clear();
+      }, 
     );
   }
 }
