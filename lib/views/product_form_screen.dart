@@ -18,6 +18,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _formData = Map<String, Object>();
   bool _isLoading = false;
 
+  Widget appBarTitle = Text("Conversas");
+  Icon actionIcon = Icon(Icons.search);
+
   void _updateImage() {
     if(isValidImageUrl(_imageUrlController.text)) {
       setState(() {});
@@ -107,12 +110,13 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           title: Text('Ocorreu um erro!'),
           content: Text('Ocorreu um erro inesperado, tente depois.'),
           actions: [
-            FlatButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              }, 
-              child: Text('Fechar')
-            ),
+           // _searchBar()
+            // FlatButton(
+            //   onPressed: () {
+            //     Navigator.of(context).pop();
+            //   }, 
+            //   child: Text('Fechar')
+            // ),
           ],
         ),
       );
@@ -127,14 +131,47 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Formulário Produto'),
+        title: appBarTitle,
         actions: [
           IconButton(
-            icon: Icon(Icons.save), 
-            onPressed: () {
-              _saveForm();
-            }
-          ),
+      icon: actionIcon,
+      onPressed: () {
+        setState(() {
+          if ( this.actionIcon.icon == Icons.search) {
+            this.actionIcon = Icon(Icons.close);
+            this.appBarTitle = TextField(
+              onSubmitted: (value) {
+                print("sarinha " + value);
+              },
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              style: TextStyle(
+                color: Colors.white,
+              ),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                  prefixIcon: Icon(Icons.search,color: Colors.white),
+                  hintText: "Pesquisar...",
+                  hintStyle: TextStyle(color: Colors.white)
+              ),
+            );
+          } else {
+            this.actionIcon = Icon(Icons.search);
+            this.appBarTitle = Text("Conversas");
+          }
+        });
+      },
+    ),
+
+
+        //  _searchBar()
+          // IconButton(
+          //   icon: Icon(Icons.save), 
+          //   onPressed: () {
+          //      _saveForm();
+          //     //_searchBar();
+          //   }
+          // ),
         ],
       ),
       body: _isLoading ? 
@@ -259,6 +296,47 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             ),
           ),
         ),
+    );
+  }
+}
+
+class _searchBar extends StatefulWidget {
+  const _searchBar({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  __searchBarState createState() => __searchBarState();
+}
+
+class __searchBarState extends State<_searchBar> {
+  Widget appBarTitle = Text("Conversas");
+  Icon actionIcon = Icon(Icons.search);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.search),
+      onPressed: () {
+        setState(() {
+          if ( this.actionIcon.icon == Icons.search) {
+            this.actionIcon = Icon(Icons.close);
+            this.appBarTitle = TextField(
+              style: TextStyle(
+                color: Colors.white,
+              ),
+              decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search,color: Colors.white),
+                  hintText: "Pesquisar...",
+                  hintStyle: TextStyle(color: Colors.white)
+              ),
+            );
+          } else {
+            this.actionIcon = Icon(Icons.search);
+            this.appBarTitle = Text("Conversas");
+          }
+        });
+      },
     );
   }
 }
