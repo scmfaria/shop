@@ -6,6 +6,20 @@ import 'package:shop/exceptions/firebase_exception.dart';
 
 
 class Auth with ChangeNotifier {
+  DateTime _expireDate;
+  String _token;
+
+  String get token {
+    if(_token != null && _expireDate != null && _expireDate.isAfter(DateTime.now())) {
+      return _token;
+    } else {
+      return null;
+    }
+  }
+
+  bool get isAuth {
+    return token != null;
+  }
 
   Future<void> _authenticate(String email, String password, String urlSegment) async {
     final url = 'https://identitytoolkit.googleapis.com/v1/accounts:$urlSegment?key=AIzaSyDkmJwNuu7FJ5xU2kmuGvn2z8Bv-RyV-1s';
@@ -23,6 +37,14 @@ class Auth with ChangeNotifier {
 
     if(responseBody['error'] != null) {
       throw FirebaseException(responseBody['error']['message']);
+    } else {
+      _token = responseBody['idToken'];
+      _expireDate = DateTime.now().add(
+        Duration(
+          seconds: int.parse(responseBody['expiresIn']),
+        ),
+      );
+      notifyListeners();
     }
 
     return Future.value();

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -21,7 +20,10 @@ class Order {
 
 class Orders with ChangeNotifier {
   final String _baseUrl = 'https://flutter-coder-f6c87-default-rtdb.firebaseio.com/orders';
+  String _token;
   List<Order> _items = [];
+
+  Orders(this._token, this._items);
 
   List<Order> get items {
     // esse operador ... cria uma copia da lista, e nao a mesma referencia
@@ -35,7 +37,7 @@ class Orders with ChangeNotifier {
   Future<void> addOrder(List<CartItem> products, double total) async {
     final date = DateTime.now();
     final response = await http.post(
-      "$_baseUrl.json",
+      "$_baseUrl.json?auth=$_token",
       body: json.encode({
         'total': total,
         'date': date.toIso8601String(),
@@ -61,7 +63,7 @@ class Orders with ChangeNotifier {
 
   Future<void> loadOrders() async {
     List<Order> loadedItems = [];
-    final response = await http.get("$_baseUrl.json");
+    final response = await http.get("$_baseUrl.json?auth=$_token");
     Map<String, dynamic> data = json.decode(response.body);
     
     if(data != null) {

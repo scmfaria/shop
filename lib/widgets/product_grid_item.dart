@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/product.dart';
 import '../providers/cart.dart';
+import '../providers/auth.dart';
 import '../utils/app_routes.dart';
 
 class ProductGridItem extends StatelessWidget {
@@ -12,7 +13,8 @@ class ProductGridItem extends StatelessWidget {
     // primeira forma de usar o provider é declarando assim 
     // a segunda forma é usando o Consumer, declarando na raiz do componente, como esta abaixo
     final Product product = Provider.of<Product>(context, listen: false);
-    final Cart cart = Provider.of<Cart>(context, listen: false);
+    final Cart cart = Provider.of(context, listen: false);
+    final Auth auth = Provider.of(context, listen: false);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -35,7 +37,7 @@ class ProductGridItem extends StatelessWidget {
             builder: (ctx, product, _) => IconButton(
               icon: Icon(product.isFavorite ? Icons.favorite : Icons.favorite_border),
               onPressed: () {
-                product.toggleFavorite();
+                product.toggleFavorite(auth.token);
               },
               color: Theme.of(context).accentColor,
             ),
