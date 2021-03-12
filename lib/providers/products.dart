@@ -9,11 +9,12 @@ import 'package:shop/exceptions/http_exception.dart';
 import 'product.dart';
 
 class Products with ChangeNotifier {
-  final String _baseUrl = 'https://flutter-coder-f6c87-default-rtdb.firebaseio.com/products';
+  final String _baseUrl = 'https://flutter-coder-f6c87-default-rtdb.firebaseio.com/';
   List<Product> _items = [];
   String _token;
+  String _userId;
 
-  Products(this._token, this._items);
+  Products([this._token, this._userId, this._items = const []]);
 
   List<Product> get items {
     return _items;
@@ -24,20 +25,24 @@ class Products with ChangeNotifier {
   }
 
   Future<void> loadProducts() async {
-    final response = await http.get("$_baseUrl.json?auth=$_token");
+    final response = await http.get("${_baseUrl}products.json?auth=$_token");
     Map<String, dynamic> data = json.decode(response.body);
+
+    final favResponse = await http.get("${_baseUrl}userFavorites/$_userId.json?auth=$_token");
+    final favMap = json.decode(favResponse.body);
 
     _items.clear();
     
     if(data != null) {
       data.forEach((productId, productData) {
+        final isFavorite = favMap == null ? false : favMap[productId] ?? false;
         _items.add(Product(
           id: productId,
           title: productData['title'], 
           description: productData['description'], 
           price: productData['price'], 
           imageUrl: productData['imageUrl'],
-          isFavorite: productData['isFavorite'],
+          isFavorite: isFavorite,
         ));
       });
       notifyListeners();
@@ -54,7 +59,6 @@ class Products with ChangeNotifier {
         'description': newProduct.description,
         'price': newProduct.price,
         'imageUrl': newProduct.imageUrl,
-        'isFavorite': newProduct.isFavorite,
       }),
     );
 
