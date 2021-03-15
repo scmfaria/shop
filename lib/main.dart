@@ -6,10 +6,8 @@ import 'package:shop/views/orders_screen.dart';
 import 'package:shop/views/product_form_screen.dart';
 import 'package:shop/views/products_screen.dart';
 
-import './views/products_overview_screen.dart';
 import './views/product_detail_screen.dart';
 import './views/cart_screen.dart';
-import './views/auth_screen.dart';
 import 'views/auth_home_screen.dart';
 
 import './utils/app_routes.dart';
@@ -43,9 +41,10 @@ class MyApp extends StatelessWidget {
         ),
 
         ChangeNotifierProxyProvider<Auth, Orders>(
-          create: (_) => Orders(null, []),
+          create: (_) => Orders(),
           update: (ctx, auth, previousOrders) => Orders(
             auth.token, 
+            auth.userId,
             previousOrders.items
           ),
         ),
